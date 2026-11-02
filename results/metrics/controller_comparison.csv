@@ -1,0 +1,4 @@
+Controller,Average Waiting Time,Average Queue Length,Completed Vehicles,Observed Vehicles,Simulation Time
+Fixed-Time,8.19,1.09,76,80,600.0
+Q-Learning,7.83,1.04,76,80,600.0
+DQN,7.83,1.04,76,80,600.0
