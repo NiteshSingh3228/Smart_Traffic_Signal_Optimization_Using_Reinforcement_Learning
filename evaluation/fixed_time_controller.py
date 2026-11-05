@@ -1,4 +1,19 @@
 
+import sys
+import os
+
+if "SUMO_HOME" in os.environ:
+    tools = os.path.join(os.environ["SUMO_HOME"], "tools")
+    if tools not in sys.path:
+        sys.path.append(tools)
+
+for possible_path in [
+    "/Library/Frameworks/EclipseSUMO.framework/Versions/1.28.0/EclipseSUMO/share/sumo/tools",
+    os.path.abspath(".venv/lib/python3.10/site-packages"),
+]:
+    if os.path.exists(possible_path) and possible_path not in sys.path:
+        sys.path.append(possible_path)
+
 import traci
 
 from evaluation.metrics import TrafficMetrics
