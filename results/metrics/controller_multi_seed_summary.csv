@@ -1,0 +1,33 @@
+Controller,Metric,Mean,Std Dev
+Fixed-Time,average_waiting_time,8.456,0.374
+Fixed-Time,average_queue_length,1.142,0.05
+Fixed-Time,completed_vehicles,77,0.0
+Fixed-Time,observed_vehicles,81,0.0
+Fixed-Time,average_ambulance_waiting_time,24.0,0.632
+Fixed-Time,maximum_ambulance_waiting_time,24,0.632
+Fixed-Time,ambulances_observed,1,0.0
+Fixed-Time,simulation_time,600.0,0.0
+Fixed-Time + Ambulance Priority,average_waiting_time,8.514,0.425
+Fixed-Time + Ambulance Priority,average_queue_length,1.146,0.057
+Fixed-Time + Ambulance Priority,completed_vehicles,76.8,0.4
+Fixed-Time + Ambulance Priority,observed_vehicles,81,0.0
+Fixed-Time + Ambulance Priority,average_ambulance_waiting_time,18.0,0.0
+Fixed-Time + Ambulance Priority,maximum_ambulance_waiting_time,18,0.0
+Fixed-Time + Ambulance Priority,ambulances_observed,1,0.0
+Fixed-Time + Ambulance Priority,simulation_time,600.0,0.0
+Q-Learning + Ambulance Priority,average_waiting_time,12.288,0.355
+Q-Learning + Ambulance Priority,average_queue_length,1.66,0.048
+Q-Learning + Ambulance Priority,completed_vehicles,74.6,0.8
+Q-Learning + Ambulance Priority,observed_vehicles,81,0.0
+Q-Learning + Ambulance Priority,average_ambulance_waiting_time,18.0,0.0
+Q-Learning + Ambulance Priority,maximum_ambulance_waiting_time,18,0.0
+Q-Learning + Ambulance Priority,ambulances_observed,1,0.0
+Q-Learning + Ambulance Priority,simulation_time,600.0,0.0
+DQN + Ambulance Priority,average_waiting_time,8.778,0.163
+DQN + Ambulance Priority,average_queue_length,1.188,0.02
+DQN + Ambulance Priority,completed_vehicles,75.8,0.748
+DQN + Ambulance Priority,observed_vehicles,81,0.0
+DQN + Ambulance Priority,average_ambulance_waiting_time,18.0,0.0
+DQN + Ambulance Priority,maximum_ambulance_waiting_time,18,0.0
+DQN + Ambulance Priority,ambulances_observed,1,0.0
+DQN + Ambulance Priority,simulation_time,600.0,0.0

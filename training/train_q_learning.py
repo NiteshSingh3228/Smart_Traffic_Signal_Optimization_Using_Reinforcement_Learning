@@ -7,9 +7,12 @@ from environment.traffic_environment import TrafficEnvironment
 # TRAINING CONFIGURATION
 # ======================================
 
-NUM_EPISODES = 100
+NUM_EPISODES = 200
 
 agent = QLearningAgent()
+
+# FIX 2.2: load_model now also restores epsilon from checkpoint
+agent.load_model("q_learning_ambulance_model.pkl")
 
 env = TrafficEnvironment(use_gui=False)
 
@@ -20,10 +23,9 @@ env = TrafficEnvironment(use_gui=False)
 
 for episode in range(NUM_EPISODES):
 
-    print(f"\n========== EPISODE {episode + 1} ==========")
-
-    # Use a different seed for each episode
-    state = env.reset(seed=42 + episode)
+    # FIX 6: Use seeds outside the evaluation range (42-123 used for eval)
+    # Training seeds start at 1000 to avoid overlap
+    state = env.reset(seed=1000 + episode)
 
     total_reward = 0
     done = False
@@ -41,31 +43,23 @@ for episode in range(NUM_EPISODES):
             # 2. Execute action in SUMO
             next_state, reward, done = env.step(action)
 
-            # 3. Check ambulance priority override
-            if not env.emergency_override_during_step:
+            # 3. Always learn — even during ambulance override steps
+            # The reward function now encodes ambulance urgency
+            # so the agent CAN learn from ambulance-influenced transitions
+            agent.learn(
+                state,
+                action,
+                reward,
+                next_state,
+                done
+            )
 
-                # 4. Learn from valid experience
-                agent.learn(
-                    state,
-                    action,
-                    reward,
-                    next_state,
-                    done
-                )
+            training_updates += 1
 
-                training_updates += 1
-
-            else:
-
-                # Skip learning from overridden action
+            if env.emergency_override_during_step:
                 skipped_updates += 1
 
-                print(
-                    "Skipping Q-Learning update:",
-                    "Ambulance priority override occurred."
-                )
-
-            # 5. Move to next state
+            # 4. Move to next state
             state = next_state
 
             total_reward += reward
@@ -75,11 +69,11 @@ for episode in range(NUM_EPISODES):
         # EPISODE RESULTS
         # =================================
 
-        print("Episode:", episode + 1)
-        print("Total steps:", step_count)
-        print("Total reward:", total_reward)
-        print("Training updates:", training_updates)
-        print("Skipped updates:", skipped_updates)
+        print(f"\nEpisode: {episode + 1}")
+        print(f"Total steps: {step_count}")
+        print(f"Total reward: {total_reward:.2f}")
+        print(f"Training updates: {training_updates}")
+        print(f"Ambulance override steps: {skipped_updates}")
 
     finally:
 
@@ -88,14 +82,15 @@ for episode in range(NUM_EPISODES):
     # Reduce exploration
     agent.decay_epsilon()
 
-    print("Epsilon:", round(agent.epsilon, 4))
+    print(f"Epsilon: {agent.epsilon:.4f}")
 
 
 # ======================================
 # SAVE AMBULANCE-AWARE MODEL
+# FIX 2.2: epsilon is now saved inside save_model()
 # ======================================
 
-agent.save_model("q_learning_ambulance_model.pkl")
+agent.save_model("q_learning_ambulance_model_updated.pkl")
 
 
 # ======================================
@@ -104,6 +99,6 @@ agent.save_model("q_learning_ambulance_model.pkl")
 
 print("\n========== Q-LEARNING TRAINING COMPLETED ==========")
 
-print("Total episodes:", NUM_EPISODES)
-print("Total learned states:", len(agent.q_table))
-print("Final epsilon:", round(agent.epsilon, 4))
+print(f"Total episodes: {NUM_EPISODES}")
+print(f"Total learned states: {len(agent.q_table)}")
+print(f"Final epsilon: {agent.epsilon:.4f}")

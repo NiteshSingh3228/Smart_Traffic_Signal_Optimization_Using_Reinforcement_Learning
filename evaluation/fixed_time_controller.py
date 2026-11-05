@@ -17,6 +17,7 @@ EAST_WEST_YELLOW = 3
 GREEN_DURATION = 30
 YELLOW_DURATION = 3
 
+# FIX 1.2: Standardize to 600s to match MAX_EPISODE_TIME in traffic_environment.py
 MAX_SIMULATION_TIME = 600
 AMBULANCE_WAIT_THRESHOLD = 15
 
@@ -41,11 +42,20 @@ def get_ambulance_info():
         if direction not in INCOMING_EDGES:
             continue
 
+        road_id = traci.vehicle.getRoadID(vehicle_id)
+
+        # FIX: Skip ambulances that have already crossed
+        if road_id == outgoing_edge:
+            continue
+
+        if road_id.startswith(":"):
+            continue
+
         ambulance_info.append({
             "id": vehicle_id,
             "direction": direction,
             "outgoing_edge": outgoing_edge,
-            "road_id": traci.vehicle.getRoadID(vehicle_id),
+            "road_id": road_id,
             "waiting_time": traci.vehicle.getWaitingTime(vehicle_id)
         })
 
@@ -67,18 +77,9 @@ def update_ambulance_priority(priority_ambulances):
         if ambulance_id not in current_ambulances:
 
             del priority_ambulances[ambulance_id]
-            print("Ambulance priority released:", ambulance_id)
             continue
 
-        ambulance = current_ambulances[ambulance_id]
-
-        if ambulance["road_id"] == ambulance["outgoing_edge"]:
-
-            del priority_ambulances[ambulance_id]
-
-            print("Ambulance cleared intersection:", ambulance_id)
-
-    # Activate priority after 15 seconds of waiting
+    # Activate priority after threshold seconds of waiting
     for ambulance in ambulance_info:
 
         if ambulance["waiting_time"] >= AMBULANCE_WAIT_THRESHOLD:
@@ -88,13 +89,6 @@ def update_ambulance_priority(priority_ambulances):
             if ambulance_id not in priority_ambulances:
 
                 priority_ambulances[ambulance_id] = ambulance["direction"]
-
-                print(
-                    "Ambulance priority activated:",
-                    ambulance_id,
-                    "Direction:",
-                    ambulance["direction"]
-                )
 
     if priority_ambulances:
 
@@ -137,9 +131,6 @@ def switch_to_green(target_green, current_phase, metrics):
         if traci.simulation.getTime() >= MAX_SIMULATION_TIME:
             return current_phase
 
-        if traci.simulation.getMinExpectedNumber() == 0:
-            return current_phase
-
         traci.simulationStep()
         metrics.collect()
 
@@ -172,10 +163,12 @@ def run_fixed_time_controller(ambulance_priority=False):
         current_phase
     )
 
-    while (
-        traci.simulation.getTime() < MAX_SIMULATION_TIME
-        and traci.simulation.getMinExpectedNumber() > 0
-    ):
+    traci.trafficlight.setPhaseDuration(
+        TRAFFIC_LIGHT_ID,
+        GREEN_DURATION
+    )
+
+    while traci.simulation.getTime() < MAX_SIMULATION_TIME:
 
         # Advance simulation by one second
         traci.simulationStep()
@@ -199,13 +192,6 @@ def run_fixed_time_controller(ambulance_priority=False):
 
             if current_phase != emergency_green:
 
-                print(
-                    "AMBULANCE PRIORITY:",
-                    ambulance["id"],
-                    "Direction:",
-                    ambulance["direction"]
-                )
-
                 current_phase = switch_to_green(
                     emergency_green,
                     current_phase,
@@ -215,10 +201,7 @@ def run_fixed_time_controller(ambulance_priority=False):
             green_elapsed = 0
 
             # Keep emergency green until ambulance clears
-            while (
-                traci.simulation.getTime() < MAX_SIMULATION_TIME
-                and traci.simulation.getMinExpectedNumber() > 0
-            ):
+            while traci.simulation.getTime() < MAX_SIMULATION_TIME:
 
                 traci.simulationStep()
                 metrics.collect()
@@ -264,13 +247,6 @@ def run_fixed_time_controller(ambulance_priority=False):
 
             green_elapsed = 0
 
-    print("\nFixed-time simulation completed!")
-
     results = metrics.get_results()
-
-    print("\n========== TRAFFIC PERFORMANCE ==========")
-
-    for metric, value in results.items():
-        print(f"{metric}: {value}")
 
     return results

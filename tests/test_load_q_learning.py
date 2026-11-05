@@ -7,12 +7,18 @@ agent = QLearningAgent()
 print("Q-table before loading:")
 print(agent.q_table)
 
-# Load the saved model
-agent.load_model("q_learning_model.pkl")
-
-print("\nQ-table after loading:")
-print(agent.q_table)
+# FIX: Load the current model (ambulance-aware), not the old 9-dim model
+try:
+    agent.load_model("q_learning_ambulance_model_updated.pkl")
+    print("\nLoaded: q_learning_ambulance_model_updated.pkl")
+except FileNotFoundError:
+    try:
+        agent.load_model("q_learning_ambulance_model.pkl")
+        print("\nLoaded: q_learning_ambulance_model.pkl")
+    except FileNotFoundError:
+        print("\nNo model file found — using empty Q-table.")
 
 print("\nTotal learned states:", len(agent.q_table))
+print("Epsilon:", agent.epsilon)
 
 print("\nModel loading test completed!")

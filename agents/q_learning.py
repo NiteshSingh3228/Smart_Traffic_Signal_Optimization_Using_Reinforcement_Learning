@@ -1,7 +1,7 @@
 
-import random
-import pickle
 import os
+import pickle
+import random
 
 
 STATE_SIZE = 17
@@ -119,7 +119,14 @@ class QLearningAgent:
 
             q_values = self.get_q_values(state)
 
-            action = q_values.index(max(q_values))
+            # FIX 2.3: Randomly break ties among maximum Q-values
+            # prevents always picking action 0 for unseen states
+            max_val = max(q_values)
+            best_actions = [
+                i for i, val in enumerate(q_values)
+                if val == max_val
+            ]
+            action = random.choice(best_actions)
 
         return action
 
@@ -136,7 +143,9 @@ class QLearningAgent:
 
         if done:
 
-            max_future_q = 0
+            # FIX: Time-limit truncation should NOT zero the future value
+            # Use max next-Q so target is not biased toward zero
+            max_future_q = max(self.get_q_values(next_state))
 
         else:
 
@@ -162,7 +171,8 @@ class QLearningAgent:
         )
 
     # ======================================
-    # SAVE Q-TABLE
+    # SAVE MODEL
+    # FIX 2.2: Persist epsilon alongside q_table
     # ======================================
 
     def save_model(self, filename):
@@ -177,17 +187,20 @@ class QLearningAgent:
             filename
         )
 
+        checkpoint = {
+            "q_table": self.q_table,
+            "epsilon": self.epsilon
+        }
+
         with open(filepath, "wb") as file:
 
-            pickle.dump(
-                self.q_table,
-                file
-            )
+            pickle.dump(checkpoint, file)
 
         print("Model saved:", filepath)
 
     # ======================================
-    # LOAD Q-TABLE
+    # LOAD MODEL
+    # FIX 2.2: Restore epsilon from checkpoint
     # ======================================
 
     def load_model(self, filename):
@@ -199,6 +212,14 @@ class QLearningAgent:
 
         with open(filepath, "rb") as file:
 
-            self.q_table = pickle.load(file)
+            data = pickle.load(file)
+
+        # Support both old format (plain dict of states) and new format
+        if isinstance(data, dict) and "q_table" in data:
+            self.q_table = data["q_table"]
+            self.epsilon = data.get("epsilon", self.epsilon)
+        else:
+            # Legacy: data is the raw q_table dict
+            self.q_table = data
 
         print("Model loaded:", filepath)

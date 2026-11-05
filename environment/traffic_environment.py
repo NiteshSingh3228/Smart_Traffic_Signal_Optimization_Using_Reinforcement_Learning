@@ -1,4 +1,6 @@
 
+import os
+import shutil
 import traci
 
 TRAFFIC_LIGHT_ID = "center"
@@ -14,9 +16,28 @@ EAST_WEST_YELLOW = 3
 
 YELLOW_DURATION = 3
 GREEN_DURATION = 30
+
+# FIX 1.2: Standardize to 600s to match fixed_time_controller.py
 MAX_EPISODE_TIME = 600
 
 AMBULANCE_WAIT_THRESHOLD = 15
+
+
+def _resolve_sumo_binary(gui):
+    """
+    FIX 3.1: Dynamically resolve the SUMO binary.
+    Prefers the macOS framework path if it exists,
+    otherwise falls back to system PATH.
+    """
+    name = "sumo-gui" if gui else "sumo"
+    framework = (
+        "/Library/Frameworks/EclipseSUMO.framework"
+        "/Versions/1.28.0/EclipseSUMO/bin/" + name
+    )
+    if os.path.exists(framework):
+        return framework
+    resolved = shutil.which(name)
+    return resolved if resolved else name
 
 
 class TrafficEnvironment:
@@ -24,17 +45,14 @@ class TrafficEnvironment:
     def __init__(self, use_gui=False):
 
         self.current_phase = NORTH_SOUTH_GREEN
-
-        self.sumo_binary = (
-            "/Library/Frameworks/EclipseSUMO.framework/Versions/1.28.0/EclipseSUMO/bin/sumo-gui"
-            if use_gui else
-            "/Library/Frameworks/EclipseSUMO.framework/Versions/1.28.0/EclipseSUMO/bin/sumo"
-        )
-
+        self.sumo_binary = _resolve_sumo_binary(use_gui)
+        self.use_gui = use_gui
         self.is_running = False
 
+        # Remember ambulances that have received priority
         self.priority_ambulances = {}
 
+        # Track whether ambulance priority affected the current RL step
         self.emergency_override_during_step = False
 
     # =====================================
@@ -42,6 +60,14 @@ class TrafficEnvironment:
     # =====================================
 
     def reset(self, seed=42):
+
+        # Close any existing connection before starting a new one
+        if self.is_running:
+            try:
+                traci.close()
+            except Exception:
+                pass
+            self.is_running = False
 
         sumo_cmd = [
             self.sumo_binary,
@@ -51,14 +77,14 @@ class TrafficEnvironment:
             "--seed", str(seed)
         ]
 
+        if self.use_gui:
+            sumo_cmd.extend(["--delay", "200"])
+
         traci.start(sumo_cmd)
 
         self.is_running = True
-
         self.current_phase = NORTH_SOUTH_GREEN
-
         self.priority_ambulances = {}
-
         self.emergency_override_during_step = False
 
         traci.trafficlight.setPhase(
@@ -123,6 +149,7 @@ class TrafficEnvironment:
 
     # =====================================
     # 3. DETECT AMBULANCES
+    # Only report ambulances still on incoming edges (not yet crossed)
     # =====================================
 
     def get_ambulance_info(self):
@@ -150,6 +177,16 @@ class TrafficEnvironment:
                 continue
 
             road_id = traci.vehicle.getRoadID(vehicle_id)
+
+            # FIX: Skip ambulances that have already crossed the intersection
+            # (they are on the outgoing edge or an internal edge)
+            if road_id == outgoing_edge:
+                continue
+
+            # Also skip ambulances that are on internal junction edges
+            # (they are actively passing through)
+            if road_id.startswith(":"):
+                continue
 
             waiting_time = traci.vehicle.getWaitingTime(vehicle_id)
 
@@ -181,31 +218,13 @@ class TrafficEnvironment:
         # Check previously prioritized ambulances
         for ambulance_id in list(self.priority_ambulances):
 
-            # Ambulance has left the simulation
+            # Ambulance has left the simulation or already crossed
             if ambulance_id not in current_ambulances:
 
                 del self.priority_ambulances[ambulance_id]
-
-                print(
-                    "Ambulance priority released:",
-                    ambulance_id
-                )
-
                 continue
 
-            ambulance = current_ambulances[ambulance_id]
-
-            # Ambulance has reached its outgoing road
-            if ambulance["road_id"] == ambulance["outgoing_edge"]:
-
-                del self.priority_ambulances[ambulance_id]
-
-                print(
-                    "Ambulance cleared intersection:",
-                    ambulance_id
-                )
-
-        # Activate priority after 15 seconds of waiting
+        # Activate priority after threshold seconds of waiting
         for ambulance in ambulance_info:
 
             if ambulance["waiting_time"] >= AMBULANCE_WAIT_THRESHOLD:
@@ -213,13 +232,6 @@ class TrafficEnvironment:
                 if ambulance["id"] not in self.priority_ambulances:
 
                     self.priority_ambulances[ambulance["id"]] = (
-                        ambulance["direction"]
-                    )
-
-                    print(
-                        "Ambulance priority activated:",
-                        ambulance["id"],
-                        "Direction:",
                         ambulance["direction"]
                     )
 
@@ -244,9 +256,6 @@ class TrafficEnvironment:
         for _ in range(duration):
 
             if traci.simulation.getTime() >= MAX_EPISODE_TIME:
-                break
-
-            if traci.simulation.getMinExpectedNumber() == 0:
                 break
 
             traci.simulationStep()
@@ -290,10 +299,7 @@ class TrafficEnvironment:
             metrics
         )
 
-        if (
-            traci.simulation.getTime() >= MAX_EPISODE_TIME
-            or traci.simulation.getMinExpectedNumber() == 0
-        ):
+        if traci.simulation.getTime() >= MAX_EPISODE_TIME:
             return False
 
         # Activate required green
@@ -322,9 +328,6 @@ class TrafficEnvironment:
         while elapsed < duration:
 
             if traci.simulation.getTime() >= MAX_EPISODE_TIME:
-                break
-
-            if traci.simulation.getMinExpectedNumber() == 0:
                 break
 
             # Advance simulation by one second
@@ -357,13 +360,6 @@ class TrafficEnvironment:
 
                 # Override RL if necessary
                 if self.current_phase != emergency_green:
-
-                    print(
-                        "AMBULANCE PRIORITY:",
-                        ambulance["id"],
-                        "Direction:",
-                        direction
-                    )
 
                     switched = self.switch_to_green(
                         emergency_green,
@@ -425,13 +421,6 @@ class TrafficEnvironment:
 
                 target_green = EAST_WEST_GREEN
 
-            print(
-                "AMBULANCE PRIORITY ACTIVE:",
-                ambulance["id"],
-                "Direction:",
-                direction
-            )
-
         # Switch through yellow if necessary
         switched = self.switch_to_green(
             target_green,
@@ -460,15 +449,13 @@ class TrafficEnvironment:
         next_state = self.get_state()
         reward = self.calculate_reward()
 
-        done = (
-            traci.simulation.getTime() >= MAX_EPISODE_TIME
-            or traci.simulation.getMinExpectedNumber() == 0
-        )
+        done = traci.simulation.getTime() >= MAX_EPISODE_TIME
 
         return next_state, reward, done
 
     # =====================================
     # 9. CALCULATE REWARD
+    # FIX 2.1: Include ambulance waiting penalty
     # =====================================
 
     def calculate_reward(self):
@@ -478,7 +465,14 @@ class TrafficEnvironment:
             for edge in INCOMING_EDGES
         )
 
-        return -total_queue
+        # Additional penalty for ambulances waiting
+        # (weight 5.0 so ambulance waiting is strongly discouraged)
+        ambulance_penalty = sum(
+            ambulance["waiting_time"] * 5.0
+            for ambulance in self.get_ambulance_info()
+        )
+
+        return -(total_queue + ambulance_penalty)
 
     # =====================================
     # 10. CLOSE ENVIRONMENT
@@ -487,5 +481,9 @@ class TrafficEnvironment:
     def close(self):
 
         if self.is_running:
-            traci.close()
-            self.is_running = False
+            try:
+                traci.close()
+            except Exception:
+                pass
+            finally:
+                self.is_running = False

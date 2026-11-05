@@ -10,7 +10,15 @@ def evaluate_dqn():
 
     # Create agent and load trained model
     agent = DQNAgent()
-    agent.load_model("dqn_model.pth")
+
+    # Try the ambulance-updated model first; fall back to baseline
+    try:
+        agent.load_model("dqn_ambulance_model_updated.pth")
+    except (FileNotFoundError, KeyError, ValueError):
+        try:
+            agent.load_model("dqn_ambulance_model.pth")
+        except (FileNotFoundError, KeyError, ValueError):
+            print("WARNING: No valid DQN model found. Using untrained agent.")
 
     # Disable exploration
     agent.epsilon = 0
@@ -47,7 +55,6 @@ def evaluate_dqn():
             step_count += 1
 
         print("\nDQN simulation completed!")
-
         print("Total steps:", step_count)
         print("Total reward:", total_reward)
 

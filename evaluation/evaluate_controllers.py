@@ -1,6 +1,7 @@
 
 import csv
 import os
+import shutil
 import traci
 
 from agents.q_learning import QLearningAgent
@@ -10,11 +11,23 @@ from evaluation.metrics import TrafficMetrics
 from evaluation.fixed_time_controller import run_fixed_time_controller
 
 
+def _get_sumo_binary():
+    """Resolve sumo binary path dynamically."""
+    framework = (
+        "/Library/Frameworks/EclipseSUMO.framework"
+        "/Versions/1.28.0/EclipseSUMO/bin/sumo"
+    )
+    if os.path.exists(framework):
+        return framework
+    resolved = shutil.which("sumo")
+    return resolved if resolved else "sumo"
+
+
 # =====================================
 # FIXED-TIME EVALUATION
 # =====================================
 
-def evaluate_fixed_time(ambulance_priority=False):
+def evaluate_fixed_time(ambulance_priority=False, seed=42):
 
     if ambulance_priority:
         print("\n========== FIXED-TIME + AMBULANCE PRIORITY EVALUATION ==========")
@@ -22,11 +35,11 @@ def evaluate_fixed_time(ambulance_priority=False):
         print("\n========== FIXED-TIME EVALUATION ==========")
 
     sumo_cmd = [
-        "sumo",
+        _get_sumo_binary(),
         "-n", "sumo/network/intersection.net.xml",
         "-r", "sumo/routes/routes.rou.xml",
         "--no-step-log", "true",
-        "--seed", "42"
+        "--seed", str(seed)
     ]
 
     traci.start(sumo_cmd)
@@ -46,12 +59,12 @@ def evaluate_fixed_time(ambulance_priority=False):
 # Q-LEARNING EVALUATION
 # =====================================
 
-def evaluate_q_learning():
+def evaluate_q_learning(seed=42):
 
     print("\n========== Q-LEARNING EVALUATION ==========")
 
     agent = QLearningAgent()
-    agent.load_model("q_learning_ambulance_model.pkl")
+    agent.load_model("q_learning_ambulance_model_updated.pkl")
     agent.epsilon = 0
 
     env = TrafficEnvironment(use_gui=False)
@@ -59,7 +72,7 @@ def evaluate_q_learning():
 
     try:
 
-        state = env.reset(seed=42)
+        state = env.reset(seed=seed)
         done = False
 
         while not done:
@@ -85,12 +98,12 @@ def evaluate_q_learning():
 # DQN EVALUATION
 # =====================================
 
-def evaluate_dqn():
+def evaluate_dqn(seed=42):
 
     print("\n========== DQN EVALUATION ==========")
 
     agent = DQNAgent()
-    agent.load_model("dqn_ambulance_model.pth")
+    agent.load_model("dqn_ambulance_model_updated.pth")
     agent.epsilon = 0
 
     env = TrafficEnvironment(use_gui=False)
@@ -98,7 +111,7 @@ def evaluate_dqn():
 
     try:
 
-        state = env.reset(seed=42)
+        state = env.reset(seed=seed)
         done = False
 
         while not done:
@@ -135,6 +148,7 @@ def save_comparison(results):
         fieldnames = [
             "Controller",
             "Average Waiting Time",
+            "Average Travel Time",
             "Average Queue Length",
             "Completed Vehicles",
             "Observed Vehicles",
@@ -156,6 +170,7 @@ def save_comparison(results):
             writer.writerow({
                 "Controller": controller,
                 "Average Waiting Time": metrics["average_waiting_time"],
+                "Average Travel Time": metrics.get("average_travel_time", 0),
                 "Average Queue Length": metrics["average_queue_length"],
                 "Completed Vehicles": metrics["completed_vehicles"],
                 "Observed Vehicles": metrics["observed_vehicles"],

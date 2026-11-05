@@ -3,7 +3,14 @@ from agents.dqn_agent import DQNAgent
 
 agent = DQNAgent()
 
-state = (2, 1, 3, 2, 1, 0, 4, 2, 0)
+# FIX 1.1: Use a valid 17-element state vector
+# (8 traffic values, 4 ambulance counts, 4 ambulance wait times, 1 phase)
+state = (
+    2, 1, 3, 2, 1, 0, 4, 2,
+    0, 1, 0, 0,
+    0, 8, 0, 0,
+    0
+)
 
 action = agent.choose_action(state)
 
@@ -18,4 +25,11 @@ else:
 
 print("Memory size:", len(agent.memory))
 
-print("DQN agent created successfully!")
+# FIX: Also test with epsilon=0 to exercise the neural network path
+agent.epsilon = 0
+
+action_exploit = agent.choose_action(state)
+
+print("Exploit action (epsilon=0):", action_exploit)
+
+print("DQN agent created and tested successfully!")

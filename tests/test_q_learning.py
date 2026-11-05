@@ -1,42 +1,46 @@
-
 from agents.q_learning import QLearningAgent
 
-# Create Q-Learning agent
-agent = QLearningAgent()
+def test_q_learning_agent():
 
-# Sample traffic state
-state = (4, 2, 3, 1, 5, 2, 2, 1, 0)
+    agent = QLearningAgent()
 
-print("Initial Q-table:", agent.q_table)
+    # 17-value traffic state
+    state = (
+        4, 2, 3, 1, 5, 2, 2, 1,
+        0, 1, 0, 0,
+        0, 5, 0, 0,
+        0
+    )
 
-# Select an action
-action = agent.choose_action(state)
+    next_state = (
+        2, 1, 3, 1, 2, 1, 1, 0,
+        0, 1, 0, 0,
+        0, 3, 0, 0,
+        1
+    )
 
-print("\nSelected action:", action)
+    # Test action selection
+    action = agent.choose_action(state)
 
-if action == 0:
-    print("Selected signal: North-South Green")
-else:
-    print("Selected signal: East-West Green")
+    assert action in [0, 1]
 
-# Sample next traffic state
-next_state = (2, 1, 3, 1, 2, 1, 1, 0, 0)
+    # Test Q-learning update
+    agent.learn(
+        state,
+        action,
+        reward=2,
+        next_state=next_state,
+        done=False
+    )
 
-# Sample reward
-reward = 2
+    discrete_state = agent.discretize_state(state)
 
-# Update Q-table
-agent.learn(
-    state,
-    action,
-    reward,
-    next_state,
-    done=False
-)
+    assert discrete_state in agent.q_table
 
-print("\nUpdated Q-table:", agent.q_table)
+    # Test epsilon decay
+    old_epsilon = agent.epsilon
+    agent.decay_epsilon()
 
-# Reduce exploration
-agent.decay_epsilon()
+    assert agent.epsilon <= old_epsilon
 
-print("\nUpdated epsilon:", agent.epsilon)
+    print("Q-Learning test passed!")

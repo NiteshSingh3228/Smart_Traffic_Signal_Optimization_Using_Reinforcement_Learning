@@ -56,7 +56,20 @@ plt.tight_layout()
 plt.savefig("results/graphs/ambulance_waiting_comparison.png")
 plt.close()
 
-print("\nAll 4 graphs saved successfully!")
+# Graph 5: Average Travel Time (if column exists)
+if "Average Travel Time" in df.columns:
+    plt.figure(figsize=(10, 5))
+    plt.bar(df["Controller"], df["Average Travel Time"])
+    plt.title("Average Travel Time Comparison")
+    plt.xlabel("Controller")
+    plt.ylabel("Travel Time (seconds)")
+    plt.xticks(rotation=15, ha="right")
+    plt.tight_layout()
+    plt.savefig("results/graphs/travel_time_comparison.png")
+    plt.close()
+    print("5 graphs saved successfully!")
+else:
+    print("4 graphs saved successfully (no travel time column in CSV).")
 
 print("\nGenerated graph files:")
 print(os.listdir("results/graphs"))

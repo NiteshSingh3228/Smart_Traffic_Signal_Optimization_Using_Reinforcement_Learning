@@ -66,25 +66,26 @@ Smart_Traffic_Signal_Optimization_Using_Reinforcement_Learning/
 │   └── traffic_monitor.py           # Traffic data collection utility
 │
 ├── training/                        # Training scripts
-│   ├── train_q_learning.py          # Train Q-Learning agent (100 episodes)
-│   └── train_dqn.py                 # Train DQN agent (100 episodes)
+│   ├── train_q_learning.py          # Train Q-Learning agent (200 episodes)
+│   └── train_dqn.py                 # Train DQN agent (200 episodes)
 │
 ├── evaluation/                      # Evaluation and comparison
-│   ├── evaluate_controllers.py      # Compare Fixed-Time vs Q-Learning vs DQN
+│   ├── evaluate_controllers.py      # Compare Fixed-Time vs Q-Learning vs DQN (all 4 controllers)
+│   ├── evaluate_multiple_seeds.py   # Multi-seed evaluation across 5 seeds
 │   ├── evaluate_dqn.py              # Standalone DQN evaluation
 │   ├── fixed_time_controller.py     # Fixed-time signal controller (baseline)
-│   ├── metrics.py                   # TrafficMetrics class (waiting time, queue, throughput)
-│   ├── plot_results.py              # Generate comparison bar charts
-│   └── save_results.py              # Save evaluation results to CSV
+│   ├── metrics.py                   # TrafficMetrics class (waiting time, travel time, queue, ambulance)
+│   ├── plot_results.py              # Generate 5 comparison bar charts
+│   └── save_results.py              # Deprecated — do not run directly
 │
 ├── tests/                           # Test scripts
 │   ├── test_traffic_environment.py  # Full episode simulation test
 │   ├── test_traffic_monitor.py      # Traffic data collection test
-│   ├── test_q_learning.py           # Q-Learning agent unit test
+│   ├── test_q_learning.py           # Q-Learning agent unit test (pytest)
 │   ├── test_q_learning_state.py     # Q-Learning 17-value state test
 │   ├── test_load_q_learning.py      # Model loading test
-│   ├── test_dqn_agent.py            # DQN agent unit test
-│   ├── test_dqn_state.py            # DQN normalization test
+│   ├── test_dqn_agent.py            # DQN agent unit test (17-element state)
+│   ├── test_dqn_state.py            # DQN normalization and tensor test
 │   ├── test_fixed_time.py           # Fixed-time controller test
 │   ├── test_metrics.py              # Metrics collection test
 │   ├── test_ambulance_detection.py  # Ambulance detection test
@@ -98,25 +99,30 @@ Smart_Traffic_Signal_Optimization_Using_Reinforcement_Learning/
 │   │   ├── intersection.edg.xml     # Road edge definitions (8 edges)
 │   │   └── intersection.net.xml     # Compiled SUMO network
 │   ├── routes/
-│   │   └── routes.rou.xml           # Vehicle types, routes, traffic flows, and ambulance
+│   │   └── routes.rou.xml           # Vehicle types, routes, traffic flows, 3 ambulances (N/E/S)
 │   ├── config/                      # (Reserved for SUMO configuration)
 │   └── additional/                  # (Reserved for additional SUMO files)
 │
 ├── results/                         # Training and evaluation outputs
 │   ├── models/
-│   │   ├── q_learning_model.pkl             # Trained Q-Learning Q-table
-│   │   ├── q_learning_ambulance_model.pkl   # Ambulance-aware Q-Learning model
-│   │   ├── dqn_model.pth                    # Trained DQN model checkpoint
-│   │   └── dqn_ambulance_model.pth          # Ambulance-aware DQN model
+│   │   ├── q_learning_ambulance_model.pkl          # Ambulance-aware Q-Learning model
+│   │   ├── q_learning_ambulance_model_updated.pkl  # Retrained Q-Learning (epsilon-persisted)
+│   │   ├── dqn_ambulance_model.pth                 # Ambulance-aware DQN model
+│   │   └── dqn_ambulance_model_updated.pth         # Retrained DQN (Huber loss, gradient clipping)
 │   ├── metrics/
-│   │   └── controller_comparison.csv        # Side-by-side performance comparison
+│   │   ├── controller_comparison.csv               # Single-seed side-by-side comparison (10 columns)
+│   │   ├── controller_multi_seed_runs.csv          # Raw runs across 5 seeds
+│   │   └── controller_multi_seed_summary.csv       # Mean and std dev summary
 │   ├── graphs/
-│   │   ├── waiting_time_comparison.png      # Waiting time bar chart
-│   │   ├── queue_length_comparison.png      # Queue length bar chart
-│   │   └── throughput_comparison.png        # Throughput bar chart
-│   └── logs/                                # (Reserved for training logs)
+│   │   ├── waiting_time_comparison.png             # Average waiting time bar chart
+│   │   ├── queue_length_comparison.png             # Average queue length bar chart
+│   │   ├── throughput_comparison.png               # Completed vehicles bar chart
+│   │   ├── ambulance_waiting_comparison.png        # Ambulance waiting time bar chart
+│   │   └── travel_time_comparison.png              # Average travel time bar chart
+│   └── logs/                                       # (Reserved for training logs)
 │
-├── dashboard/                       # (Reserved for web dashboard)
+├── dashboard/
+│   └── app.py                       # Streamlit dashboard: live simulation + 5-seed results
 ├── .gitignore                       # Git ignore rules
 └── README.md                        # This file
 ```
@@ -334,15 +340,19 @@ The system includes a real-time **ambulance priority override** mechanism:
 
 ## Results
 
-Performance comparison across controllers (600-second simulation, seed 42):
+Performance comparison is generated by running the evaluation suite.
+All controllers run on the same 600-second simulation time, using seeds outside the training range for fair comparison.
 
-| Controller | Avg Waiting Time (s) | Avg Queue Length | Completed Vehicles | Observed Vehicles |
-|------------|---------------------|-----------------|-------------------|------------------|
-| Fixed-Time | 8.19 | 1.09 | 76 | 80 |
-| Q-Learning | 3.92 | 0.52 | 76 | 80 |
-| DQN | 2.94 | 0.39 | 76 | 80 |
+To regenerate results:
 
-> **Key takeaway**: Both RL agents significantly outperform the fixed-time controller. DQN achieves the lowest average waiting time (**64% reduction** vs fixed-time) and queue length (**64% reduction**), while maintaining the same vehicle throughput.
+```bash
+python -m evaluation.evaluate_controllers     # single seed (42) comparison
+python -m evaluation.evaluate_multiple_seeds  # 5-seed mean + std dev
+python -m evaluation.plot_results             # regenerate 5 bar charts
+```
+
+> **Note**: Earlier README results (DQN 2.94 s) were sourced from `save_results.py` (now deprecated) which contained hardcoded legacy values. Those numbers cannot be reproduced by running the code today and have been removed.
+
 
 ---
 
@@ -356,7 +366,7 @@ Key parameters can be adjusted in the source files:
 | `YELLOW_DURATION` | `traffic_environment.py` | 3 s | Duration of yellow transition |
 | `MAX_EPISODE_TIME` | `traffic_environment.py` | 600 s | Maximum simulation time per episode |
 | `AMBULANCE_WAIT_THRESHOLD` | `traffic_environment.py` | 15 s | Seconds before ambulance gets priority |
-| `NUM_EPISODES` | `train_q_learning.py` / `train_dqn.py` | 100 | Number of training episodes |
+| `NUM_EPISODES` | `train_q_learning.py` / `train_dqn.py` | 200 | Number of training episodes |
 | `learning_rate` | `q_learning.py` | 0.1 | Q-Learning step size (α) |
 | `discount_factor` | `q_learning.py` | 0.95 | Future reward discount (γ) |
 | `epsilon_decay` | `q_learning.py` / `dqn_agent.py` | 0.995 | Exploration decay rate |
@@ -366,8 +376,8 @@ Key parameters can be adjusted in the source files:
 **SUMO Network:**
 - 5 nodes: 1 traffic-light-controlled center + 4 priority endpoints (N, S, E, W)
 - 8 edges: 2 lanes per direction, speed limit 13.89 m/s (≈50 km/h)
-- 480 cars total: 120 vehicles per direction over 3600 seconds
-- 1 ambulance: departs at t=10s, travels North→South
+- ~120 cars per direction per hour (probability-based flow over 600 seconds)
+- 3 ambulances: North→South (t=25s), East→West (t=200s), South→North (t=400s)
 
 ---
 

@@ -1,78 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
+<?xml version='1.0' encoding='UTF-8'?>
 <routes>
-
-    <!-- Normal Car -->
-    <vType
-        id="car"
-        accel="2.6"
-        decel="4.5"
-        sigma="0.5"
-        length="5"
-        maxSpeed="13.89"
-    />
-
-    <!-- Ambulance -->
-    <vType
-        id="ambulance"
-        accel="3.0"
-        decel="5.0"
-        sigma="0.5"
-        length="5"
-        maxSpeed="16.67"
-        vClass="emergency"
-        color="1,0,0"
-    />
+    <!-- Vehicle Types -->
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="13.89" guiShape="passenger" color="30,144,255" />
+    <vType id="ambulance" accel="3.0" decel="5.0" sigma="0.5" length="5" maxSpeed="16.67" vClass="emergency" color="255,0,0" guiShape="passenger" />
 
     <!-- Four Traffic Routes -->
-    <route id="north_south" edges="N_in S_out"/>
-    <route id="south_north" edges="S_in N_out"/>
-    <route id="east_west" edges="E_in W_out"/>
-    <route id="west_east" edges="W_in E_out"/>
+    <route id="north_south" edges="N_in S_out" />
+    <route id="south_north" edges="S_in N_out" />
+    <route id="east_west" edges="E_in W_out" />
+    <route id="west_east" edges="W_in E_out" />
 
-    <!-- Normal Traffic: 120 Vehicles Per Direction -->
-    <flow
-        id="flow_NS"
-        type="car"
-        route="north_south"
-        begin="0"
-        end="3600"
-        number="120"
-    />
+    <!-- Normal Traffic: Approximately 120 Vehicles Per Direction Per Hour -->
+    <flow id="flow_NS" type="car" route="north_south" begin="0" end="600" probability="0.033333" />
+    <flow id="flow_SN" type="car" route="south_north" begin="0" end="600" probability="0.033333" />
+    <flow id="flow_EW" type="car" route="east_west" begin="0" end="600" probability="0.033333" />
+    <flow id="flow_WE" type="car" route="west_east" begin="0" end="600" probability="0.033333" />
 
-    <flow
-        id="flow_SN"
-        type="car"
-        route="south_north"
-        begin="0"
-        end="3600"
-        number="120"
-    />
-
-    <flow
-        id="flow_EW"
-        type="car"
-        route="east_west"
-        begin="0"
-        end="3600"
-        number="120"
-    />
-
-    <flow
-        id="flow_WE"
-        type="car"
-        route="west_east"
-        begin="0"
-        end="3600"
-        number="120"
-    />
-
-    <!-- Test Ambulance: North to South -->
-    <vehicle
-        id="ambulance_N"
-        type="ambulance"
-        route="north_south"
-        depart="25"
-    />
-
+    <!-- Ambulances from multiple directions for comprehensive training -->
+    <!-- North to South: departs at t=25 -->
+    <vehicle id="ambulance_N" type="ambulance" route="north_south" depart="25" />
+    <!-- East to West: departs at t=200 -->
+    <vehicle id="ambulance_E" type="ambulance" route="east_west" depart="200" />
+    <!-- South to North: departs at t=400 -->
+    <vehicle id="ambulance_S" type="ambulance" route="south_north" depart="400" />
 </routes>

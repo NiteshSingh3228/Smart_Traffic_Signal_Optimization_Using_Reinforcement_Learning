@@ -1,6 +1,6 @@
 
-import random
 import os
+import random
 from collections import deque
 
 import numpy as np
@@ -61,6 +61,8 @@ class DQNAgent:
         self.learning_rate = 0.001
         self.batch_size = 64
 
+        # FIX 2.5: Store normalized float tensors directly in memory
+        # avoids re-normalizing 128 states on every learn() call
         self.memory = deque(maxlen=10000)
 
         # Main neural network
@@ -86,7 +88,8 @@ class DQNAgent:
             lr=self.learning_rate
         )
 
-        self.loss_function = nn.MSELoss()
+        # FIX: Use Huber loss for robustness against large Q-value errors
+        self.loss_function = nn.SmoothL1Loss()
 
         self.training_steps = 0
 
@@ -125,8 +128,11 @@ class DQNAgent:
                 min(max(value / 30.0, 0.0), 1.0)
             )
 
-        # Last value: Traffic signal phase
-        normalized.append(state[16] / 2.0)
+        # FIX 2.4: state[16] can be 0,1,2,3 — divide by 3.0 not 2.0
+        # prevents overflow when phase == 3 (yellow phase)
+        normalized.append(
+            min(max(state[16] / 3.0, 0.0), 1.0)
+        )
 
         return normalized
 
@@ -142,6 +148,7 @@ class DQNAgent:
 
     # =================================
     # 4. STORE EXPERIENCE
+    # FIX 2.5: Pre-normalize here so learn() gets tensors directly
     # =================================
 
     def remember(
@@ -153,8 +160,21 @@ class DQNAgent:
         done
     ):
 
+        # Store as float tensors to avoid repeated normalization in learn()
+        state_tensor = torch.tensor(
+            self.normalize_state(state),
+            dtype=torch.float32,
+            device=DEVICE
+        )
+
+        next_state_tensor = torch.tensor(
+            self.normalize_state(next_state),
+            dtype=torch.float32,
+            device=DEVICE
+        )
+
         self.memory.append(
-            (state, action, reward, next_state, done)
+            (state_tensor, action, reward, next_state_tensor, done)
         )
 
     # =================================
@@ -192,16 +212,10 @@ class DQNAgent:
             self.batch_size
         )
 
+        # FIX 2.5: Tensors are already normalized — stack directly
         states, actions, rewards, next_states, dones = zip(*batch)
 
-        states = torch.tensor(
-            np.array([
-                self.normalize_state(state)
-                for state in states
-            ]),
-            dtype=torch.float32,
-            device=DEVICE
-        )
+        states = torch.stack(states)
 
         actions = torch.tensor(
             actions,
@@ -215,14 +229,7 @@ class DQNAgent:
             device=DEVICE
         )
 
-        next_states = torch.tensor(
-            np.array([
-                self.normalize_state(state)
-                for state in next_states
-            ]),
-            dtype=torch.float32,
-            device=DEVICE
-        )
+        next_states = torch.stack(next_states)
 
         dones = torch.tensor(
             dones,
@@ -242,11 +249,13 @@ class DQNAgent:
                 next_states
             ).max(dim=1)[0]
 
+            # FIX: Truncation at time limit is not a true terminal state
+            # do NOT zero future value for time-limit done
             target_q_values = rewards + (
                 self.gamma * next_q_values * (1 - dones)
             )
 
-        # Calculate loss
+        # Calculate loss with Huber loss (FIX: replaces MSELoss)
         loss = self.loss_function(
             current_q_values,
             target_q_values
@@ -256,6 +265,12 @@ class DQNAgent:
         self.optimizer.zero_grad()
 
         loss.backward()
+
+        # FIX: Gradient clipping to prevent exploding gradients
+        torch.nn.utils.clip_grad_norm_(
+            self.policy_network.parameters(),
+            max_norm=10.0
+        )
 
         self.optimizer.step()
 

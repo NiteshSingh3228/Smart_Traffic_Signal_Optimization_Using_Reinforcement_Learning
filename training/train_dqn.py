@@ -1,16 +1,27 @@
 
+import random
+import torch
+
 from agents.dqn_agent import DQNAgent
 from environment.traffic_environment import TrafficEnvironment
+
+
+# =====================================
+# REPRODUCIBILITY
+# =====================================
+
+random.seed(0)
+torch.manual_seed(0)
 
 
 # =====================================
 # TRAINING SETTINGS
 # =====================================
 
-NUM_EPISODES = 100
+NUM_EPISODES = 200
 
 agent = DQNAgent()
-
+agent.load_model("dqn_ambulance_model.pth")
 env = TrafficEnvironment(use_gui=False)
 
 
@@ -22,12 +33,13 @@ for episode in range(NUM_EPISODES):
 
     print(f"\n========== EPISODE {episode + 1} ==========")
 
-    state = env.reset(seed=42 + episode)
+    # FIX 6: Use seeds outside evaluation range (42, 123 used for eval)
+    state = env.reset(seed=1000 + episode)
 
     total_reward = 0
     total_loss = 0
     training_updates = 0
-    skipped_updates = 0
+    ambulance_override_steps = 0
 
     done = False
     step_count = 0
@@ -42,36 +54,27 @@ for episode in range(NUM_EPISODES):
             # 2. Execute action in SUMO
             next_state, reward, done = env.step(action)
 
-            # 3. Check whether ambulance priority overrode the RL action
-            if not env.emergency_override_during_step:
+            # 3. Store experience and train
+            # FIX: Always store and learn — reward now includes
+            # ambulance penalty, so the agent learns from all steps
+            agent.remember(
+                state,
+                action,
+                reward,
+                next_state,
+                done
+            )
 
-                # 4. Store valid experience
-                agent.remember(
-                    state,
-                    action,
-                    reward,
-                    next_state,
-                    done
-                )
+            loss = agent.learn()
 
-                # 5. Train neural network
-                loss = agent.learn()
+            if loss is not None:
+                total_loss += loss
+                training_updates += 1
 
-                if loss is not None:
-                    total_loss += loss
-                    training_updates += 1
+            if env.emergency_override_during_step:
+                ambulance_override_steps += 1
 
-            else:
-
-                # Do not learn from an overridden action
-                skipped_updates += 1
-
-                print(
-                    "Skipping DQN update:",
-                    "Ambulance priority override occurred."
-                )
-
-            # 6. Move to next state
+            # 4. Move to next state
             state = next_state
 
             total_reward += reward
@@ -81,24 +84,24 @@ for episode in range(NUM_EPISODES):
         # EPISODE RESULTS
         # =================================
 
-        print("\nEpisode:", episode + 1)
-        print("Total steps:", step_count)
-        print("Total reward:", total_reward)
-        print("Replay memory:", len(agent.memory))
-        print("Training updates:", training_updates)
-        print("Skipped updates:", skipped_updates)
+        print(f"\nEpisode: {episode + 1}")
+        print(f"Total steps: {step_count}")
+        print(f"Total reward: {total_reward:.2f}")
+        print(f"Replay memory: {len(agent.memory)}")
+        print(f"Training updates: {training_updates}")
+        print(f"Ambulance override steps: {ambulance_override_steps}")
 
         average_loss = (
             total_loss / training_updates
             if training_updates > 0 else 0
         )
 
-        print("Average loss:", round(average_loss, 4))
+        print(f"Average loss: {average_loss:.4f}")
 
         # Reduce exploration once per episode
         agent.decay_epsilon()
 
-        print("Epsilon:", round(agent.epsilon, 4))
+        print(f"Epsilon: {agent.epsilon:.4f}")
 
     finally:
         env.close()
@@ -108,7 +111,7 @@ for episode in range(NUM_EPISODES):
 # SAVE AMBULANCE-AWARE MODEL
 # =====================================
 
-agent.save_model("dqn_ambulance_model.pth")
+agent.save_model("dqn_ambulance_model_updated.pth")
 
 
 # =====================================
@@ -117,6 +120,6 @@ agent.save_model("dqn_ambulance_model.pth")
 
 print("\n========== DQN TRAINING COMPLETED ==========")
 
-print("Total episodes:", NUM_EPISODES)
-print("Replay memory size:", len(agent.memory))
-print("Final epsilon:", round(agent.epsilon, 4))
+print(f"Total episodes: {NUM_EPISODES}")
+print(f"Replay memory size: {len(agent.memory)}")
+print(f"Final epsilon: {agent.epsilon:.4f}")

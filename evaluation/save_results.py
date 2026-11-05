@@ -1,40 +1,15 @@
 
-import csv
-import os
+"""
+DEPRECATED: This file previously contained hardcoded legacy results
+and would overwrite controller_comparison.csv with stale data.
 
-results = [
-    {
-        "Controller": "Fixed-Time",
-        "Average Waiting Time": 8.19,
-        "Average Queue Length": 1.09,
-        "Completed Vehicles": 76,
-        "Observed Vehicles": 80,
-        "Simulation Time": 600
-    },
-    {
-        "Controller": "Q-Learning",
-        "Average Waiting Time": 3.92,
-        "Average Queue Length": 0.52,
-        "Completed Vehicles": 76,
-        "Observed Vehicles": 80,
-        "Simulation Time": 600
-    }
-]
+To generate evaluation results, run:
+    python -m evaluation.evaluate_controllers
 
-os.makedirs("results/metrics", exist_ok=True)
+Do NOT run this file directly.
+"""
 
-with open(
-    "results/metrics/controller_comparison.csv",
-    "w",
-    newline=""
-) as file:
-
-    writer = csv.DictWriter(
-        file,
-        fieldnames=results[0].keys()
-    )
-
-    writer.writeheader()
-    writer.writerows(results)
-
-print("Updated comparison results saved successfully!")
+print(
+    "ERROR: save_results.py is deprecated and must not be run directly.\n"
+    "Run 'python -m evaluation.evaluate_controllers' instead."
+)
