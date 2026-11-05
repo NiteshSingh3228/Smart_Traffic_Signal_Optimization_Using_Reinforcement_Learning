@@ -13,6 +13,7 @@ for possible_path in [
     if os.path.exists(possible_path) and possible_path not in sys.path:
         sys.path.append(possible_path)
 
+
 import traci
 
 INCOMING_EDGES = [
