@@ -44,3 +44,7 @@ def test_q_learning_agent():
     assert agent.epsilon <= old_epsilon
 
     print("Q-Learning test passed!")
+
+
+if __name__ == "__main__":
+    test_q_learning_agent()
