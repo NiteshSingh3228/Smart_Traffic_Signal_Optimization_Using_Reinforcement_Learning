@@ -24,13 +24,17 @@ class TrafficEnvironment:
     def __init__(self, use_gui=False):
 
         self.current_phase = NORTH_SOUTH_GREEN
-        self.sumo_binary = "sumo-gui" if use_gui else "sumo"
+
+        self.sumo_binary = (
+            "/Library/Frameworks/EclipseSUMO.framework/Versions/1.28.0/EclipseSUMO/bin/sumo-gui"
+            if use_gui else
+            "/Library/Frameworks/EclipseSUMO.framework/Versions/1.28.0/EclipseSUMO/bin/sumo"
+        )
+
         self.is_running = False
 
-        # Remember ambulances that have received priority
         self.priority_ambulances = {}
 
-        # Track whether ambulance priority affected the current RL step
         self.emergency_override_during_step = False
 
     # =====================================
@@ -50,12 +54,11 @@ class TrafficEnvironment:
         traci.start(sumo_cmd)
 
         self.is_running = True
+
         self.current_phase = NORTH_SOUTH_GREEN
 
-        # Clear priority information for a new episode
         self.priority_ambulances = {}
 
-        # Reset the override flag
         self.emergency_override_during_step = False
 
         traci.trafficlight.setPhase(
@@ -484,6 +487,5 @@ class TrafficEnvironment:
     def close(self):
 
         if self.is_running:
-
             traci.close()
             self.is_running = False

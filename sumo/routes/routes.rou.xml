@@ -72,7 +72,7 @@
         id="ambulance_N"
         type="ambulance"
         route="north_south"
-        depart="10"
+        depart="25"
     />
 
 </routes>

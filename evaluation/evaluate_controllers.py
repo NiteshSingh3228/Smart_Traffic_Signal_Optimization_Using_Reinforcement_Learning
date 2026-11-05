@@ -14,11 +14,12 @@ from evaluation.fixed_time_controller import run_fixed_time_controller
 # FIXED-TIME EVALUATION
 # =====================================
 
-def evaluate_fixed_time():
+def evaluate_fixed_time(ambulance_priority=False):
 
-    print("\n========== FIXED-TIME EVALUATION ==========")
-
-    metrics = TrafficMetrics()
+    if ambulance_priority:
+        print("\n========== FIXED-TIME + AMBULANCE PRIORITY EVALUATION ==========")
+    else:
+        print("\n========== FIXED-TIME EVALUATION ==========")
 
     sumo_cmd = [
         "sumo",
@@ -31,7 +32,9 @@ def evaluate_fixed_time():
     traci.start(sumo_cmd)
 
     try:
-        results = run_fixed_time_controller()
+        results = run_fixed_time_controller(
+            ambulance_priority=ambulance_priority
+        )
 
     finally:
         traci.close()
@@ -48,7 +51,7 @@ def evaluate_q_learning():
     print("\n========== Q-LEARNING EVALUATION ==========")
 
     agent = QLearningAgent()
-    agent.load_model("q_learning_model.pkl")
+    agent.load_model("q_learning_ambulance_model.pkl")
     agent.epsilon = 0
 
     env = TrafficEnvironment(use_gui=False)
@@ -87,7 +90,7 @@ def evaluate_dqn():
     print("\n========== DQN EVALUATION ==========")
 
     agent = DQNAgent()
-    agent.load_model("dqn_model.pth")
+    agent.load_model("dqn_ambulance_model.pth")
     agent.epsilon = 0
 
     env = TrafficEnvironment(use_gui=False)
@@ -135,6 +138,9 @@ def save_comparison(results):
             "Average Queue Length",
             "Completed Vehicles",
             "Observed Vehicles",
+            "Average Ambulance Waiting Time",
+            "Maximum Ambulance Waiting Time",
+            "Ambulances Observed",
             "Simulation Time"
         ]
 
@@ -153,6 +159,9 @@ def save_comparison(results):
                 "Average Queue Length": metrics["average_queue_length"],
                 "Completed Vehicles": metrics["completed_vehicles"],
                 "Observed Vehicles": metrics["observed_vehicles"],
+                "Average Ambulance Waiting Time": metrics["average_ambulance_waiting_time"],
+                "Maximum Ambulance Waiting Time": metrics["maximum_ambulance_waiting_time"],
+                "Ambulances Observed": metrics["ambulances_observed"],
                 "Simulation Time": metrics["simulation_time"]
             })
 
@@ -167,11 +176,17 @@ if __name__ == "__main__":
 
     results = {}
 
-    results["Fixed-Time"] = evaluate_fixed_time()
+    results["Fixed-Time"] = evaluate_fixed_time(
+        ambulance_priority=False
+    )
 
-    results["Q-Learning"] = evaluate_q_learning()
+    results["Fixed-Time + Ambulance Priority"] = evaluate_fixed_time(
+        ambulance_priority=True
+    )
 
-    results["DQN"] = evaluate_dqn()
+    results["Q-Learning + Ambulance Priority"] = evaluate_q_learning()
+
+    results["DQN + Ambulance Priority"] = evaluate_dqn()
 
     print("\n========== FINAL COMPARISON ==========")
 
