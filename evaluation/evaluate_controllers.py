@@ -4,6 +4,11 @@ import csv
 import os
 import shutil
 
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+os.chdir(_PROJECT_ROOT)
+
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
     if tools not in sys.path:
@@ -41,30 +46,32 @@ def _get_sumo_binary():
 # FIXED-TIME EVALUATION
 # =====================================
 
-def evaluate_fixed_time(ambulance_priority=False, seed=42):
+def evaluate_fixed_time(ambulance_priority=False, seed=42, network_mode="corridor_2"):
 
     if ambulance_priority:
         print("\n========== FIXED-TIME + AMBULANCE PRIORITY EVALUATION ==========")
     else:
         print("\n========== FIXED-TIME EVALUATION ==========")
 
-    sumo_cmd = [
-        _get_sumo_binary(),
-        "-n", "sumo/network/intersection.net.xml",
-        "-r", "sumo/routes/routes.rou.xml",
-        "--no-step-log", "true",
-        "--seed", str(seed)
-    ]
-
-    traci.start(sumo_cmd)
+    env = TrafficEnvironment(use_gui=False, network_mode=network_mode)
+    metrics = TrafficMetrics(incoming_edges=env.monitored_incoming_edges)
 
     try:
-        results = run_fixed_time_controller(
-            ambulance_priority=ambulance_priority
-        )
+        env.reset(seed=seed)
+        done = False
+        step_cycle = 0
+
+        while not done:
+            # Fixed 30s phase alternation (action 0 = NS Green, action 1 = EW Green)
+            action = 0 if (step_cycle < 1) else 1
+            step_cycle = (step_cycle + 1) % 2
+
+            next_state, reward, done = env.step(action, metrics=metrics)
+
+        results = metrics.get_results()
 
     finally:
-        traci.close()
+        env.close()
 
     return results
 
@@ -82,7 +89,7 @@ def evaluate_q_learning(seed=42):
     agent.epsilon = 0
 
     env = TrafficEnvironment(use_gui=False)
-    metrics = TrafficMetrics()
+    metrics = TrafficMetrics(incoming_edges=env.monitored_incoming_edges)
 
     try:
 
@@ -121,7 +128,7 @@ def evaluate_dqn(seed=42):
     agent.epsilon = 0
 
     env = TrafficEnvironment(use_gui=False)
-    metrics = TrafficMetrics()
+    metrics = TrafficMetrics(incoming_edges=env.monitored_incoming_edges)
 
     try:
 

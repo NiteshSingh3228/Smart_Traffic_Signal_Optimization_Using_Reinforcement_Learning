@@ -1,0 +1,26 @@
+{
+  "Ridge_Regression": {
+    "val_mae": 35.283,
+    "val_rmse": 47.574,
+    "val_r2": 0.324,
+    "test_mae": 41.944,
+    "test_rmse": 57.727,
+    "test_r2": 0.2058
+  },
+  "Random_Forest": {
+    "val_mae": 27.776,
+    "val_rmse": 39.479,
+    "val_r2": 0.5345,
+    "test_mae": 38.233,
+    "test_rmse": 54.067,
+    "test_r2": 0.3033
+  },
+  "Gradient_Boosting": {
+    "val_mae": 29.739,
+    "val_rmse": 41.648,
+    "val_r2": 0.4819,
+    "test_mae": 40.849,
+    "test_rmse": 58.935,
+    "test_r2": 0.1722
+  }
+}

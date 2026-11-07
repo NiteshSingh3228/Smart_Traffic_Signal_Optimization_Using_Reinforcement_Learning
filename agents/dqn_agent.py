@@ -249,10 +249,11 @@ class DQNAgent:
                 next_states
             ).max(dim=1)[0]
 
-            # FIX: Truncation at time limit is not a true terminal state
-            # do NOT zero future value for time-limit done
+            # In traffic signal control, episode termination is always a time-limit
+            # truncation, not an absorbing death/failure state. Therefore, future
+            # value is continuously discounted rather than zeroed out.
             target_q_values = rewards + (
-                self.gamma * next_q_values * (1 - dones)
+                self.gamma * next_q_values
             )
 
         # Calculate loss with Huber loss (FIX: replaces MSELoss)

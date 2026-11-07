@@ -26,7 +26,7 @@ INCOMING_EDGES = [
 
 class TrafficMetrics:
 
-    def __init__(self, on_update=None):
+    def __init__(self, on_update=None, incoming_edges=None):
 
         self.vehicle_waiting_times = {}
         self.ambulance_waiting_times = {}
@@ -38,13 +38,18 @@ class TrafficMetrics:
         # Actual vehicle travel-time tracking
         self.departure_times = {}
         self.vehicle_travel_times = []
+        self.last_sim_time = 0
 
         # Optional callback for live dashboard updates
         self.on_update = on_update
 
+        # Configured incoming edges for network (supports single and corridor_3)
+        self.incoming_edges = incoming_edges
+
     def collect(self):
 
         current_time = traci.simulation.getTime()
+        self.last_sim_time = current_time
 
         # 1. Record newly departed vehicles
         departed_ids = traci.simulation.getDepartedIDList()
@@ -89,10 +94,21 @@ class TrafficMetrics:
 
         self.completed_vehicles += len(arrived_ids)
 
-        # 4. Calculate queue length
+        # 4. Calculate queue length safely across known incoming edges
+        all_net_edges = set(traci.edge.getIDList())
+        if self.incoming_edges:
+            target_edges = [e for e in self.incoming_edges if e in all_net_edges]
+        else:
+            target_edges = [e for e in INCOMING_EDGES if e in all_net_edges]
+            if not target_edges:
+                target_edges = [
+                    e for e in all_net_edges
+                    if not e.startswith(":") and "_out" not in e
+                ]
+
         current_queue = sum(
             traci.edge.getLastStepHaltingNumber(edge)
-            for edge in INCOMING_EDGES
+            for edge in target_edges
         )
 
         self.total_queue_length += current_queue
@@ -145,6 +161,11 @@ class TrafficMetrics:
             if ambulance_count > 0 else 0
         )
 
+        try:
+            sim_time = traci.simulation.getTime()
+        except Exception:
+            sim_time = self.last_sim_time
+
         return {
             "average_waiting_time": round(average_waiting_time, 2),
             "average_travel_time": round(average_travel_time, 2),
@@ -158,5 +179,5 @@ class TrafficMetrics:
                 maximum_ambulance_waiting, 2
             ),
             "ambulances_observed": ambulance_count,
-            "simulation_time": traci.simulation.getTime()
+            "simulation_time": sim_time
         }

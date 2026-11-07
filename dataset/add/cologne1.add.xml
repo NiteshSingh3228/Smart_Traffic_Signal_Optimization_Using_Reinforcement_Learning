@@ -1,0 +1,12 @@
+<?xml version="1.0" ?><additional>
+    <tlLogic id="GS_cluster_357187_359543" type="static" programID="1" offset="0">
+        <phase duration="3"  state="rrrrrGGGggrrrrrGGGgg"/>
+        <phase duration="3"  state="rrrrryyyggrrrrryyygg"/>
+        <phase duration="3"  state="rrrrrrrrGGrrrrrrrrGG"/>
+        <phase duration="3"  state="rrrrrrrryyrrrrrrrryy"/>
+        <phase duration="3"  state="GGGggrrrrrGGGggrrrrr"/>
+        <phase duration="3"  state="yyyggrrrrryyyggrrrrr"/>
+        <phase duration="3"  state="rrrGGrrrrrrrrGGrrrrr"/>
+        <phase duration="3"  state="rrryyrrrrrrrryyrrrrr"/>
+    </tlLogic>
+</additional>

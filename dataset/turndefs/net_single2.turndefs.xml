@@ -1,0 +1,28 @@
+<turns>
+    <interval begin="0" end="3600">
+        <edgeRelation from=":t_0" to="t_w" probability="100"/>
+        <edgeRelation from=":t_1" to="t_s" probability="100"/>
+        <edgeRelation from=":t_10" to="t_e" probability="100"/>
+        <edgeRelation from=":t_11" to="t_n" probability="100"/>
+        <edgeRelation from=":t_2" to="t_e" probability="100"/>
+        <edgeRelation from=":t_3" to="t_n" probability="100"/>
+        <edgeRelation from=":t_4" to="t_w" probability="100"/>
+        <edgeRelation from=":t_5" to="t_s" probability="100"/>
+        <edgeRelation from=":t_6" to="t_e" probability="100"/>
+        <edgeRelation from=":t_7" to="t_n" probability="100"/>
+        <edgeRelation from=":t_8" to="t_w" probability="100"/>
+        <edgeRelation from=":t_9" to="t_s" probability="100"/>
+        <edgeRelation from="e_t" to="t_n" probability="25"/>
+        <edgeRelation from="e_t" to="t_s" probability="50"/>
+        <edgeRelation from="e_t" to="t_w" probability="25"/>
+        <edgeRelation from="n_t" to="t_e" probability="50"/>
+        <edgeRelation from="n_t" to="t_s" probability="25"/>
+        <edgeRelation from="n_t" to="t_w" probability="25"/>
+        <edgeRelation from="s_t" to="t_e" probability="25"/>
+        <edgeRelation from="s_t" to="t_n" probability="25"/>
+        <edgeRelation from="s_t" to="t_w" probability="50"/>
+        <edgeRelation from="w_t" to="t_e" probability="25"/>
+        <edgeRelation from="w_t" to="t_n" probability="50"/>
+        <edgeRelation from="w_t" to="t_s" probability="25"/>
+    </interval>
+</turns>

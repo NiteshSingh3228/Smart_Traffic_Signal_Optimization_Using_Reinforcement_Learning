@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<routes>
+    <!-- Vehicle Types -->
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="13.89" guiShape="passenger" color="30,144,255" />
+    <vType id="ambulance" accel="3.0" decel="5.0" sigma="0.5" length="5" maxSpeed="16.67" vClass="emergency" color="255,0,0" guiShape="passenger" />
+
+    <!-- Corridor Arterial Routes (Travel through J1, J2, J3) -->
+    <route id="corridor_WE" edges="W_in J1_J2 J2_J3 E_out" />
+    <route id="corridor_EW" edges="E_in J3_J2 J2_J1 W_out" />
+
+    <!-- Cross Street Routes for J1 (West) -->
+    <route id="cross_J1_NS" edges="N1_in S1_out" />
+    <route id="cross_J1_SN" edges="S1_in N1_out" />
+
+    <!-- Cross Street Routes for J2 (Center) -->
+    <route id="cross_J2_NS" edges="N2_in S2_out" />
+    <route id="cross_J2_SN" edges="S2_in N2_out" />
+
+    <!-- Cross Street Routes for J3 (East) -->
+    <route id="cross_J3_NS" edges="N3_in S3_out" />
+    <route id="cross_J3_SN" edges="S3_in N3_out" />
+
+    <!-- Turning Corridor Routes -->
+    <route id="turn_N1_E" edges="N1_in J1_J2 J2_J3 E_out" />
+    <route id="turn_W_S3" edges="W_in J1_J2 J2_J3 S3_out" />
+
+    <!-- Main Corridor Flows (Higher arterial density ~300 veh/hr each way) -->
+    <flow id="flow_corridor_WE" type="car" route="corridor_WE" begin="0" end="86400" probability="0.08" />
+    <flow id="flow_corridor_EW" type="car" route="corridor_EW" begin="0" end="86400" probability="0.08" />
+
+    <!-- Cross Street Passenger Flows (~120 veh/hr per cross-approach) -->
+    <flow id="flow_J1_NS" type="car" route="cross_J1_NS" begin="0" end="86400" probability="0.03" />
+    <flow id="flow_J1_SN" type="car" route="cross_J1_SN" begin="0" end="86400" probability="0.03" />
+
+    <flow id="flow_J2_NS" type="car" route="cross_J2_NS" begin="0" end="86400" probability="0.03" />
+    <flow id="flow_J2_SN" type="car" route="cross_J2_SN" begin="0" end="86400" probability="0.03" />
+
+    <flow id="flow_J3_NS" type="car" route="cross_J3_NS" begin="0" end="86400" probability="0.03" />
+    <flow id="flow_J3_SN" type="car" route="cross_J3_SN" begin="0" end="86400" probability="0.03" />
+
+    <flow id="flow_turn_N1_E" type="car" route="turn_N1_E" begin="0" end="86400" probability="0.02" />
+    <flow id="flow_turn_W_S3" type="car" route="turn_W_S3" begin="0" end="86400" probability="0.02" />
+
+    <!-- Emergency Ambulances (Corridor & Crossings) -->
+    <flow id="amb_corridor_WE" type="ambulance" route="corridor_WE" begin="0" end="86400" probability="0.003" />
+    <flow id="amb_corridor_EW" type="ambulance" route="corridor_EW" begin="0" end="86400" probability="0.003" />
+    <flow id="amb_J2_NS"       type="ambulance" route="cross_J2_NS" begin="0" end="86400" probability="0.002" />
+</routes>
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" ?><additional>
+    <tlLogic id="B" type="static" programID="1" offset="0">
+        <phase duration="3"  state="GGGrGrrrGGGrGrrr"/>
+        <phase duration="3"  state="GyyrGrrrGyyrGrrr"/>
+        <phase duration="3"  state="GrrGGrrrGrrGGrrr"/>
+        <phase duration="3"  state="GrryGrrrGrryGrrr"/>
+        <phase duration="3"  state="GrrrGGGrGrrrGGGr"/>
+        <phase duration="3"  state="GrrrGyyrGrrrGyyr"/>
+        <phase duration="3"  state="GrrrGrrGGrrrGrrG"/>
+        <phase duration="3"  state="GrrrGrryGrrrGrry"/>
+    </tlLogic>
+    <tlLogic id="E" type="static" programID="1" offset="0">
+        <phase duration="3"  state="GGGrGrrrGGGrGrrr"/>
+        <phase duration="3"  state="GyyrGrrrGyyrGrrr"/>
+        <phase duration="3"  state="GrrGGrrrGrrGGrrr"/>
+        <phase duration="3"  state="GrryGrrrGrryGrrr"/>
+        <phase duration="3"  state="GrrrGGGrGrrrGGGr"/>
+        <phase duration="3"  state="GrrrGyyrGrrrGyyr"/>
+        <phase duration="3"  state="GrrrGrrGGrrrGrrG"/>
+        <phase duration="3"  state="GrrrGrryGrrrGrry"/>
+    </tlLogic>
+</additional>

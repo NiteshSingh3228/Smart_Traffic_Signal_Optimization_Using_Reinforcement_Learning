@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges>
+    <!-- East-West Arterial Corridor Segments -->
+    <edge id="W_in" from="W_outer" to="J1" numLanes="2" speed="13.89"/>
+    <edge id="W_out" from="J1" to="W_outer" numLanes="2" speed="13.89"/>
+
+    <edge id="J1_J2" from="J1" to="J2" numLanes="2" speed="13.89"/>
+    <edge id="J2_J1" from="J2" to="J1" numLanes="2" speed="13.89"/>
+
+    <edge id="J2_J3" from="J2" to="J3" numLanes="2" speed="13.89"/>
+    <edge id="J3_J2" from="J3" to="J2" numLanes="2" speed="13.89"/>
+
+    <edge id="E_in" from="E_outer" to="J3" numLanes="2" speed="13.89"/>
+    <edge id="E_out" from="J3" to="E_outer" numLanes="2" speed="13.89"/>
+
+    <!-- Junction 1 (West) Cross Streets -->
+    <edge id="N1_in" from="N1" to="J1" numLanes="2" speed="13.89"/>
+    <edge id="N1_out" from="J1" to="N1" numLanes="2" speed="13.89"/>
+    <edge id="S1_in" from="S1" to="J1" numLanes="2" speed="13.89"/>
+    <edge id="S1_out" from="J1" to="S1" numLanes="2" speed="13.89"/>
+
+    <!-- Junction 2 (Center) Cross Streets -->
+    <edge id="N2_in" from="N2" to="J2" numLanes="2" speed="13.89"/>
+    <edge id="N2_out" from="J2" to="N2" numLanes="2" speed="13.89"/>
+    <edge id="S2_in" from="S2" to="J2" numLanes="2" speed="13.89"/>
+    <edge id="S2_out" from="J2" to="S2" numLanes="2" speed="13.89"/>
+
+    <!-- Junction 3 (East) Cross Streets -->
+    <edge id="N3_in" from="N3" to="J3" numLanes="2" speed="13.89"/>
+    <edge id="N3_out" from="J3" to="N3" numLanes="2" speed="13.89"/>
+    <edge id="S3_in" from="S3" to="J3" numLanes="2" speed="13.89"/>
+    <edge id="S3_out" from="J3" to="S3" numLanes="2" speed="13.89"/>
+</edges>
+

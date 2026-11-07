@@ -1,4 +1,24 @@
 
+import os
+import sys
+
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+os.chdir(_PROJECT_ROOT)
+
+if "SUMO_HOME" in os.environ:
+    tools = os.path.join(os.environ["SUMO_HOME"], "tools")
+    if tools not in sys.path:
+        sys.path.append(tools)
+
+for possible_path in [
+    "/Library/Frameworks/EclipseSUMO.framework/Versions/1.28.0/EclipseSUMO/share/sumo/tools",
+    os.path.abspath(".venv/lib/python3.10/site-packages"),
+]:
+    if os.path.exists(possible_path) and possible_path not in sys.path:
+        sys.path.append(possible_path)
+
 from agents.q_learning import QLearningAgent
 from environment.traffic_environment import TrafficEnvironment
 
@@ -11,8 +31,10 @@ NUM_EPISODES = 200
 
 agent = QLearningAgent()
 
-# FIX 2.2: load_model now also restores epsilon from checkpoint
-agent.load_model("q_learning_ambulance_model.pkl")
+try:
+    agent.load_model("q_learning_ambulance_model.pkl")
+except (FileNotFoundError, KeyError, ValueError):
+    print("No compatible checkpoint found. Starting Q-Learning from scratch.")
 
 env = TrafficEnvironment(use_gui=False)
 

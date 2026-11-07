@@ -1,0 +1,30 @@
+<?xml version="1.0" ?><additional>
+    <tlLogic id="360082" type="static" programID="1" offset="0">
+        <phase duration="3"  state="GGggrrrGGGg"/>
+        <phase duration="3"  state="yyggrrryyyg"/>
+        <phase duration="3"  state="rrGGrrrrrrG"/>
+        <phase duration="3"  state="rryyrrrrrry"/>
+        <phase duration="3"  state="rrrrGGgGrrr"/>
+        <phase duration="3"  state="rrrryyyyrrr"/>
+    </tlLogic>
+    <tlLogic id="360086" type="static" programID="1" offset="0">
+        <phase duration="3"  state="GGGggrrrrGGGggrrrr"/>
+        <phase duration="3"  state="yyyggrrrryyyggrrrr"/>
+        <phase duration="3"  state="rrrGGrrrrrrrGGrrrr"/>
+        <phase duration="3"  state="rrryyrrrrrrryyrrrr"/>
+        <phase duration="3"  state="rrrrrGGggrrrrrGGgg"/>
+        <phase duration="3"  state="rrrrryyggrrrrryygg"/>
+        <phase duration="3"  state="rrrrrrrGGrrrrrrrGG"/>
+        <phase duration="3"  state="rrrrrrryyrrrrrrryy"/>
+    </tlLogic>
+    <tlLogic id="GS_cluster_2415878664_254486231_359566_359576" type="static" programID="1" offset="0">
+        <phase duration="3"  state="GGGggrrrrrGGGggrrrrr"/>
+        <phase duration="3"  state="yyyggrrrrryyyggrrrrr"/>
+        <phase duration="3"  state="rrrGGrrrrrrrrGGrrrrr"/>
+        <phase duration="3"  state="rrryyrrrrrrrryyrrrrr"/>
+        <phase duration="3"  state="rrrrrGGGggrrrrrGGGgg"/>
+        <phase duration="3"  state="rrrrryyyggrrrrryyygg"/>
+        <phase duration="3"  state="rrrrrrrrGGrrrrrrrrGG"/>
+        <phase duration="3"  state="rrrrrrrryyrrrrrrrryy"/>
+    </tlLogic>
+</additional>

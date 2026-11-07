@@ -34,63 +34,73 @@ class QLearningAgent:
     # ======================================
 
     def discretize_state(self, state):
+        """
+        Compress the 17-D continuous traffic state into a compact, highly learnable discrete tuple.
+        Solves the curse of dimensionality by shrinking 8.5 billion states into 216 states:
+          1. Queue imbalance: NS heavier (0), EW heavier (1), Balanced (2)
+          2. Total queue pressure: Empty (0), Light (1), Heavy (2)
+          3. Approaching traffic imbalance: NS more (0), EW more (1), Balanced (2)
+          4. Emergency vehicle presence: None (0), NS (1), EW (2), Both (3)
+          5. Active signal phase: NS Green (0), EW Green (1)
+        Total state space: 3 * 3 * 3 * 4 * 2 = 216 states.
+        """
 
         if len(state) != STATE_SIZE:
             raise ValueError(
                 f"Expected {STATE_SIZE} state values, got {len(state)}"
             )
 
-        discrete_state = []
+        # 1. Queue imbalance between directions
+        ns_queue = state[1] + state[3]
+        ew_queue = state[5] + state[7]
+        diff_queue = ns_queue - ew_queue
 
-        # 1. Normal traffic values (first 8 values)
-        for value in state[:8]:
+        if diff_queue > 1:
+            q_balance = 0
+        elif diff_queue < -1:
+            q_balance = 1
+        else:
+            q_balance = 2
 
-            if value == 0:
-                discrete_state.append(0)
+        # 2. Total queue congestion level
+        total_q = ns_queue + ew_queue
 
-            elif value <= 2:
-                discrete_state.append(1)
+        if total_q == 0:
+            q_pressure = 0
+        elif total_q <= 4:
+            q_pressure = 1
+        else:
+            q_pressure = 2
 
-            elif value <= 5:
-                discrete_state.append(2)
+        # 3. Approaching traffic flow imbalance
+        ns_cars = state[0] + state[2]
+        ew_cars = state[4] + state[6]
+        diff_cars = ns_cars - ew_cars
 
-            else:
-                discrete_state.append(3)
+        if diff_cars > 1:
+            car_balance = 0
+        elif diff_cars < -1:
+            car_balance = 1
+        else:
+            car_balance = 2
 
-        # 2. Ambulance counts (next 4 values)
-        for value in state[8:12]:
+        # 4. Emergency vehicle demand
+        ns_amb = (state[8] + state[9] > 0) or (state[12] + state[13] > 0)
+        ew_amb = (state[10] + state[11] > 0) or (state[14] + state[15] > 0)
 
-            if value == 0:
-                discrete_state.append(0)
+        if ns_amb and not ew_amb:
+            amb_state = 1
+        elif ew_amb and not ns_amb:
+            amb_state = 2
+        elif ns_amb and ew_amb:
+            amb_state = 3
+        else:
+            amb_state = 0
 
-            elif value == 1:
-                discrete_state.append(1)
+        # 5. Current traffic signal phase (0: NS Green, 1: EW Green)
+        phase_state = 0 if state[16] == 0 else 1
 
-            elif value <= 3:
-                discrete_state.append(2)
-
-            else:
-                discrete_state.append(3)
-
-        # 3. Ambulance waiting times (next 4 values)
-        for value in state[12:16]:
-
-            if value == 0:
-                discrete_state.append(0)
-
-            elif value <= 5:
-                discrete_state.append(1)
-
-            elif value <= 15:
-                discrete_state.append(2)
-
-            else:
-                discrete_state.append(3)
-
-        # 4. Current traffic signal phase
-        discrete_state.append(state[16])
-
-        return tuple(discrete_state)
+        return (q_balance, q_pressure, car_balance, amb_state, phase_state)
 
     # ======================================
     # GET Q-VALUES

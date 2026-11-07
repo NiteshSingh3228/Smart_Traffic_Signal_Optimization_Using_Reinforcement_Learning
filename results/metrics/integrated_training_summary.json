@@ -1,0 +1,9 @@
+{
+  "num_episodes": 20,
+  "dqn_episodes": 10,
+  "q_episodes": 10,
+  "dqn_mean_reward": -31.251007298121266,
+  "q_mean_reward": -55.84799929774202,
+  "dqn_final_memory": 249,
+  "q_final_states": 166
+}

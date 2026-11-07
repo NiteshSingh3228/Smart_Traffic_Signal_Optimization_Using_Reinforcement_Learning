@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<routes>
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="13.89" guiShape="passenger" color="30,144,255" />
+    <vType id="ambulance" accel="3.0" decel="5.0" sigma="0.5" length="5" maxSpeed="16.67" vClass="emergency" color="255,0,0" guiShape="passenger" />
+
+    <route id="corridor_WE" edges="W_in J1_J2 E_out" />
+    <route id="corridor_EW" edges="E_in J2_J1 W_out" />
+    <route id="cross_J1_NS" edges="N1_in S1_out" />
+    <route id="cross_J1_SN" edges="S1_in N1_out" />
+    <route id="cross_J2_NS" edges="N2_in S2_out" />
+    <route id="cross_J2_SN" edges="S2_in N2_out" />
+    <route id="turn_N1_E" edges="N1_in J1_J2 E_out" />
+    <route id="turn_W_S2" edges="W_in J1_J2 S2_out" />
+
+    <flow id="flow_corridor_WE" type="car" route="corridor_WE" begin="0" end="86400" probability="0.0406" />
+    <flow id="flow_corridor_EW" type="car" route="corridor_EW" begin="0" end="86400" probability="0.0300" />
+    <flow id="flow_J1_NS" type="car" route="cross_J1_NS" begin="0" end="86400" probability="0.0114" />
+    <flow id="flow_J1_SN" type="car" route="cross_J1_SN" begin="0" end="86400" probability="0.0064" />
+    <flow id="flow_J2_NS" type="car" route="cross_J2_NS" begin="0" end="86400" probability="0.0061" />
+    <flow id="flow_J2_SN" type="car" route="cross_J2_SN" begin="0" end="86400" probability="0.0058" />
+    <flow id="flow_turn_N1_E" type="car" route="turn_N1_E" begin="0" end="86400" probability="0.0100" />
+    <flow id="flow_turn_W_S2" type="car" route="turn_W_S2" begin="0" end="86400" probability="0.0100" />
+
+    <flow id="amb_corridor_WE" type="ambulance" route="corridor_WE" begin="0" end="86400" probability="0.0020" />
+    <flow id="amb_corridor_EW" type="ambulance" route="corridor_EW" begin="0" end="86400" probability="0.0020" />
+    <flow id="amb_J1_NS"       type="ambulance" route="cross_J1_NS" begin="0" end="86400" probability="0.0010" />
+    <flow id="amb_J2_NS"       type="ambulance" route="cross_J2_NS" begin="0" end="86400" probability="0.0010" />
+</routes>

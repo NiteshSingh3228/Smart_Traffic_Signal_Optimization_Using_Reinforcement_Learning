@@ -1,0 +1,48 @@
+<turns>
+    <interval begin="0" end="3600">
+        <edgeRelation from="-32038056#3" to="-28198821#4" probability="41.66666667"/>
+        <edgeRelation from="-32038056#3" to="32038051#0" probability="25"/>
+        <edgeRelation from="-32038056#3" to="32038056#0" probability="16.66666667"/>
+        <edgeRelation from="-32038056#3" to="32324544#0" probability="16.66666667"/>
+        <edgeRelation from="130165204" to="27115123#3" probability="100"/>
+        <edgeRelation from="23429231#1" to="-28198821#4" probability="16.66666667"/>
+        <edgeRelation from="23429231#1" to="32038051#0" probability="41.66666667"/>
+        <edgeRelation from="23429231#1" to="32038056#0" probability="25"/>
+        <edgeRelation from="23429231#1" to="32324544#0" probability="16.66666667"/>
+        <edgeRelation from="27115123#2" to="27115123#3" probability="100"/>
+        <edgeRelation from="27115123#3" to="-28198821#4" probability="25"/>
+        <edgeRelation from="27115123#3" to="32038051#0" probability="16.66666667"/>
+        <edgeRelation from="27115123#3" to="32038056#0" probability="16.66666667"/>
+        <edgeRelation from="27115123#3" to="32324544#0" probability="41.66666667"/>
+        <edgeRelation from="28198821#3" to="-28198821#4" probability="16.66666667"/>
+        <edgeRelation from="28198821#3" to="32038051#0" probability="16.66666667"/>
+        <edgeRelation from="28198821#3" to="32038056#0" probability="41.66666667"/>
+        <edgeRelation from="28198821#3" to="32324544#0" probability="25"/>
+        <edgeRelation from=":364075_0" to="27115123#3" probability="100"/>
+        <edgeRelation from=":364075_1" to="27115123#3" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_0" to="32038051#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_1" to="-28198821#4" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_10" to="32324544#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_11" to="32038056#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_13" to="32038051#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_14" to="-28198821#4" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_15" to="-28198821#4" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_16" to="32324544#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_18" to="32038056#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_19" to="32038051#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_20" to="32324544#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_21" to="32038056#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_22" to="-28198821#4" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_23" to="32324544#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_24" to="32038051#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_25" to="-28198821#4" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_26" to="32038056#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_27" to="32038051#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_3" to="32324544#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_4" to="32038056#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_5" to="32038056#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_6" to="32038051#0" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_8" to="-28198821#4" probability="100"/>
+        <edgeRelation from=":cluster_357187_359543_9" to="32324544#0" probability="100"/>
+    </interval>
+</turns>

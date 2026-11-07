@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes>
+    <!-- 3 Controlled Traffic Light Junctions -->
+    <node id="J1" x="-250" y="0" type="traffic_light"/>
+    <node id="J2" x="0" y="0" type="traffic_light"/>
+    <node id="J3" x="250" y="0" type="traffic_light"/>
+
+    <!-- Corridor Outer Terminal Nodes -->
+    <node id="W_outer" x="-450" y="0" type="priority"/>
+    <node id="E_outer" x="450" y="0" type="priority"/>
+
+    <!-- Cross Street Terminal Nodes for J1 -->
+    <node id="N1" x="-250" y="200" type="priority"/>
+    <node id="S1" x="-250" y="-200" type="priority"/>
+
+    <!-- Cross Street Terminal Nodes for J2 -->
+    <node id="N2" x="0" y="200" type="priority"/>
+    <node id="S2" x="0" y="-200" type="priority"/>
+
+    <!-- Cross Street Terminal Nodes for J3 -->
+    <node id="N3" x="250" y="200" type="priority"/>
+    <node id="S3" x="250" y="-200" type="priority"/>
+</nodes>
+

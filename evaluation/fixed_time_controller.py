@@ -21,6 +21,17 @@ from evaluation.metrics import TrafficMetrics
 
 TRAFFIC_LIGHT_ID = "center"
 
+def _resolve_tls(preferred=None):
+    try:
+        tls = traci.trafficlight.getIDList()
+        if preferred and preferred in tls:
+            return [preferred]
+        if tls:
+            return list(tls)
+        return ["center"]
+    except Exception:
+        return ["center"]
+
 INCOMING_EDGES = ["N_in", "S_in", "E_in", "W_in"]
 
 NORTH_SOUTH_GREEN = 0
@@ -136,10 +147,11 @@ def switch_to_green(target_green, current_phase, metrics):
         yellow_phase = EAST_WEST_YELLOW
 
     # Safely switch through yellow
-    traci.trafficlight.setPhase(
-        TRAFFIC_LIGHT_ID,
-        yellow_phase
-    )
+    for tl in _resolve_tls():
+        try:
+            traci.trafficlight.setPhase(tl, yellow_phase)
+        except Exception:
+            pass
 
     for _ in range(YELLOW_DURATION):
 
@@ -150,22 +162,20 @@ def switch_to_green(target_green, current_phase, metrics):
         metrics.collect()
 
     # Activate the required green
-    traci.trafficlight.setPhase(
-        TRAFFIC_LIGHT_ID,
-        target_green
-    )
-
-    traci.trafficlight.setPhaseDuration(
-        TRAFFIC_LIGHT_ID,
-        GREEN_DURATION
-    )
+    for tl in _resolve_tls():
+        try:
+            traci.trafficlight.setPhase(tl, target_green)
+            traci.trafficlight.setPhaseDuration(tl, GREEN_DURATION)
+        except Exception:
+            pass
 
     return target_green
 
 
-def run_fixed_time_controller(ambulance_priority=False):
+def run_fixed_time_controller(ambulance_priority=False, max_simulation_time=MAX_SIMULATION_TIME):
 
     metrics = TrafficMetrics()
+    limit = max_simulation_time if max_simulation_time is not None else float("inf")
 
     current_phase = NORTH_SOUTH_GREEN
 
@@ -173,17 +183,14 @@ def run_fixed_time_controller(ambulance_priority=False):
 
     green_elapsed = 0
 
-    traci.trafficlight.setPhase(
-        TRAFFIC_LIGHT_ID,
-        current_phase
-    )
+    for tl in _resolve_tls():
+        try:
+            traci.trafficlight.setPhase(tl, current_phase)
+            traci.trafficlight.setPhaseDuration(tl, GREEN_DURATION)
+        except Exception:
+            pass
 
-    traci.trafficlight.setPhaseDuration(
-        TRAFFIC_LIGHT_ID,
-        GREEN_DURATION
-    )
-
-    while traci.simulation.getTime() < MAX_SIMULATION_TIME:
+    while traci.simulation.getTime() < limit:
 
         # Advance simulation by one second
         traci.simulationStep()
@@ -216,7 +223,7 @@ def run_fixed_time_controller(ambulance_priority=False):
             green_elapsed = 0
 
             # Keep emergency green until ambulance clears
-            while traci.simulation.getTime() < MAX_SIMULATION_TIME:
+            while traci.simulation.getTime() < limit:
 
                 traci.simulationStep()
                 metrics.collect()
@@ -240,7 +247,18 @@ def run_fixed_time_controller(ambulance_priority=False):
                         metrics
                     )
 
-            # Resume normal fixed-time cycle
+            # Resume normal fixed-time cycle by switching to opposite phase
+            # to prevent starving cross-traffic that waited during emergency
+            next_green = (
+                EAST_WEST_GREEN
+                if current_phase == NORTH_SOUTH_GREEN
+                else NORTH_SOUTH_GREEN
+            )
+            current_phase = switch_to_green(
+                next_green,
+                current_phase,
+                metrics
+            )
             green_elapsed = 0
             continue
 

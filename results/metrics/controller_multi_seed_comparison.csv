@@ -1,0 +1,9 @@
+Controller,Avg Waiting Time (s),Std Waiting Time,Avg Travel Time (s),Avg Queue Length,Std Queue Length,Completed Vehicles,Observed Vehicles,Avg Ambulance Wait (s),Max Ambulance Wait (s)
+Fixed-Time (Corridor),11.98,0.67,61.11,2.35,0.13,105.0,118.0,8.07,22.0
+Fixed-Time + Amb Priority (Corridor),11.98,0.67,61.11,2.35,0.13,105.0,118.0,8.07,22.0
+Baseline Q-Learning (Source 1),14.51,0.98,63.18,2.84,0.22,105.4,118.0,10.05,24.0
+Baseline DQN (Source 1),12.03,0.87,60.33,2.36,0.29,105.2,118.0,0.55,10.0
+Baseline Hybrid Ensemble (Source 1),12.03,0.87,60.33,2.36,0.29,105.2,118.0,0.55,10.0
+Integrated Q-Learning (Sources 1+2+3),38.1,50.97,66.45,8.17,11.55,95.6,118.0,4.59,21.0
+Integrated DQN (Sources 1+2+3),11.57,1.19,59.74,2.26,0.15,105.4,118.0,4.09,21.0
+Integrated Hybrid Ensemble (Sources 1+2+3),11.57,1.19,59.74,2.26,0.15,105.4,118.0,4.09,21.0

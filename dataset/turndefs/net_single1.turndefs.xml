@@ -1,0 +1,8 @@
+<turns>
+    <interval begin="0" end="3600">
+        <edgeRelation from=":t_0" to="t_s" probability="100"/>
+        <edgeRelation from=":t_2" to="t_e" probability="100"/>
+        <edgeRelation from="n_t" to="t_s" probability="100"/>
+        <edgeRelation from="w_t" to="t_e" probability="100"/>
+    </interval>
+</turns>

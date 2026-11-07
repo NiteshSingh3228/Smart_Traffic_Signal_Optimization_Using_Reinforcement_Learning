@@ -1,0 +1,21 @@
+# Core Deep Learning & Reinforcement Learning
+torch>=2.0.0
+numpy>=1.23.0
+
+# Scientific Computing & Data Processing
+pandas>=2.0.0
+scipy>=1.10.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Simulation & Traffic Control
+traci>=1.18.0
+
+# Visualization & Interactive Command Center Dashboard
+plotly>=5.15.0
+matplotlib>=3.7.0
+streamlit>=1.28.0
+
+# Testing & Verification
+pytest>=7.4.0
+

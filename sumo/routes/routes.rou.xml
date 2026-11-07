@@ -10,17 +10,17 @@
     <route id="east_west" edges="E_in W_out" />
     <route id="west_east" edges="W_in E_out" />
 
-    <!-- Normal Traffic: Approximately 120 Vehicles Per Direction Per Hour -->
-    <flow id="flow_NS" type="car" route="north_south" begin="0" end="600" probability="0.033333" />
-    <flow id="flow_SN" type="car" route="south_north" begin="0" end="600" probability="0.033333" />
-    <flow id="flow_EW" type="car" route="east_west" begin="0" end="600" probability="0.033333" />
-    <flow id="flow_WE" type="car" route="west_east" begin="0" end="600" probability="0.033333" />
+    <!-- Continuous Random Passenger Traffic: Arterial (NS/SN: ~240 veh/hr) & Cross-street (EW/WE: ~120 veh/hr) -->
+    <!-- Non-stop flows up to 24 hours (86400s) with independent Bernoulli arrivals per second -->
+    <flow id="flow_NS" type="car" route="north_south" begin="0" end="86400" probability="0.066667" />
+    <flow id="flow_SN" type="car" route="south_north" begin="0" end="86400" probability="0.066667" />
+    <flow id="flow_EW" type="car" route="east_west"   begin="0" end="86400" probability="0.033333" />
+    <flow id="flow_WE" type="car" route="west_east"   begin="0" end="86400" probability="0.033333" />
 
-    <!-- Ambulances from multiple directions for comprehensive training -->
-    <!-- North to South: departs at t=25 -->
-    <vehicle id="ambulance_N" type="ambulance" route="north_south" depart="25" />
-    <!-- East to West: departs at t=200 -->
-    <vehicle id="ambulance_E" type="ambulance" route="east_west" depart="200" />
-    <!-- South to North: departs at t=400 -->
-    <vehicle id="ambulance_S" type="ambulance" route="south_north" depart="400" />
+    <!-- Continuous Random Emergency Ambulances from all 4 directions -->
+    <!-- Probabilistic generation: ambulances arrive stochastically across all directions non-stop -->
+    <flow id="flow_amb_NS" type="ambulance" route="north_south" begin="0" end="86400" probability="0.003333" />
+    <flow id="flow_amb_SN" type="ambulance" route="south_north" begin="0" end="86400" probability="0.003333" />
+    <flow id="flow_amb_EW" type="ambulance" route="east_west"   begin="0" end="86400" probability="0.002500" />
+    <flow id="flow_amb_WE" type="ambulance" route="west_east"   begin="0" end="86400" probability="0.002500" />
 </routes>

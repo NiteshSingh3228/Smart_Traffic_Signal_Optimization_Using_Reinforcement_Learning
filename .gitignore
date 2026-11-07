@@ -38,3 +38,10 @@ Thumbs.db
 # Logs
 *.log
 results/logs/
+
+# Testing and cache
+.pytest_cache/
+
+# Large generated route dataset (1.4GB, 26k files)
+dataset/rou/
+
